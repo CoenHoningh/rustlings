@@ -11,7 +11,6 @@ struct Color {
     blue: u8,
 }
 
-// I AM NOT DONE
 
 // Your task is to complete this implementation
 // and return an Ok result of inner type Color.
@@ -25,19 +24,32 @@ struct Color {
 // Tuple implementation
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = String;
-    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {}
+    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let (red, green, blue) = tuple;
+        match (u8::try_from(red), u8::try_from(green), u8::try_from(blue)) {
+            (Ok(red), Ok(green), Ok(blue)) => Ok(Color{ red, green, blue }),
+            _ => Err(String::from("Values not valid"))
+        }
+    }
 }
 
 // Array implementation
 impl TryFrom<[i16; 3]> for Color {
     type Error = String;
-    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {}
+    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        Color::try_from((arr[0], arr[1], arr[2]))
+    }
 }
 
 // Slice implementation
 impl TryFrom<&[i16]> for Color {
     type Error = String;
-    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {}
+    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(String::from("Slice not of length 3"))
+        }
+        Color::try_from((slice[0], slice[1], slice[2]))
+    }
 }
 
 fn main() {
@@ -88,17 +100,17 @@ mod tests {
     }
     #[test]
     fn test_array_out_of_range_positive() {
-        let c: Color = [1000, 10000, 256].try_into();
+        let c: Result<Color, String> = [1000, 10000, 256].try_into();
         assert!(c.is_err());
     }
     #[test]
     fn test_array_out_of_range_negative() {
-        let c: Color = [-10, -256, -1].try_into();
+        let c: Result<Color, String> = [-10, -256, -1].try_into();
         assert!(c.is_err());
     }
     #[test]
     fn test_array_sum() {
-        let c: Color = [-1, 255, 255].try_into();
+        let c: Result<Color, String> = [-1, 255, 255].try_into();
         assert!(c.is_err());
     }
     #[test]
